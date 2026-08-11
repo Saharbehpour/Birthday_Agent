@@ -4,6 +4,15 @@ A small, safe-by-default MVP that finds today's birthdays, uses an OpenAI model 
 
 The interesting design choice is that **automatic does not always mean agentic**. The daily birthday check is deterministic; the AI layer personalizes the message. This MVP is deliberately simple so it can be extended later with more dynamic tool choice, memory, channel selection, and ML-driven ranking or timing.
 
+## Choose your path
+
+| Path | Best for | Stack | Start here |
+|---|---|---|---|
+| No-code | Readers who want to build it without programming | Google Sheets + Zapier + OpenAI + Gmail | [`no-code/README.md`](no-code/README.md) |
+| Technical | Developers who want the code and extension points | Python + OpenAI Responses API + SMTP | Continue below |
+
+Both paths use only fake data in this public repository. Put real contact information and credentials in your own private tools, never in a fork or public commit.
+
 ## Architecture
 
 ```mermaid
@@ -18,7 +27,7 @@ flowchart LR
     H --> I[Sent log]
 ```
 
-See `docs/architecture.md` for the component breakdown.
+See `docs/architecture.md` for the Python component breakdown, or `docs/architecture-no-code.md` for the no-code workflow.
 
 ## Where to put your material
 
@@ -26,6 +35,8 @@ See `docs/architecture.md` for the component breakdown.
 |---|---|---|
 | Real names, birthdays, email addresses, relationship notes | `data/contacts.csv` | **No** |
 | Sample/fake contacts | `data/contacts.example.csv` | Yes |
+| No-code fake template | `no-code/birthday-agent-template.csv` | Yes |
+| No-code setup guide and prompt | `no-code/` | Yes |
 | OpenAI and email credentials | `.env` | **No** |
 | Safe placeholder configuration | `.env.example` | Yes |
 | Writing style / agent prompt | `prompts/birthday_message.txt` | Yes |
@@ -35,7 +46,9 @@ See `docs/architecture.md` for the component breakdown.
 
 The `.gitignore` already protects the private files above. Still, check your repo before publishing it.
 
-## 1. Set up
+## Technical MVP
+
+### 1. Set up
 
 ```bash
 python -m venv .venv
@@ -47,7 +60,7 @@ cp data/contacts.example.csv data/contacts.csv
 
 On Windows, activate the virtual environment with `.venv\\Scripts\\activate`.
 
-## 2. Add your birthday data
+### 2. Add your birthday data
 
 Edit `data/contacts.csv`:
 
@@ -60,7 +73,7 @@ Birthday format is `MM-DD`, so you do not need to store birth years.
 
 Keep context short and only store information you are comfortable using for personalization.
 
-## 3. Configure OpenAI
+### 3. Configure OpenAI
 
 Put your API key in the environment or your private `.env` file:
 
@@ -75,7 +88,7 @@ The code uses the OpenAI Responses API. The current default model is `gpt-5.6-lu
 
 Never commit `.env` or paste API keys into public code.
 
-## 4. Preview first
+### 4. Preview first
 
 Test the entire workflow without an API call:
 
@@ -91,7 +104,7 @@ birthday-agent --date 2026-08-07
 
 Preview is the default and cannot send anything.
 
-## 5. Configure email delivery
+### 5. Configure email delivery
 
 Add SMTP settings only when you are ready to test sending:
 
@@ -105,7 +118,7 @@ FROM_ADDRESS=you@example.com
 
 Use credentials designed for application access. Do not reuse or publish your normal email password.
 
-## 6. Send with approval
+### 6. Send with approval
 
 ```bash
 birthday-agent --date 2026-08-07 --mode approve
@@ -113,7 +126,7 @@ birthday-agent --date 2026-08-07 --mode approve
 
 The message is shown first. You must type `y` before it is sent.
 
-## 7. Enable automatic sending
+### 7. Enable automatic sending
 
 After you have tested preview and approval modes, set:
 
@@ -131,7 +144,7 @@ There are two gates: the CLI must explicitly request `auto`, and `AUTO_SEND_ENAB
 
 To make it automatic every day, schedule that command with cron, Task Scheduler, GitHub Actions, or another scheduler. For example, a local cron entry for 9:00 AM might run the installed `birthday-agent --mode auto` command from this project environment.
 
-## 8. Run tests
+### 8. Run tests
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -v
@@ -153,4 +166,3 @@ Good next steps:
 ## Privacy note
 
 Do not publish real contact data, private relationship notes, API keys, SMTP credentials, or send logs with the demo. The repository is designed so only fake/sample data needs to be shared.
-
